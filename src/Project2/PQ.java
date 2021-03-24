@@ -1,49 +1,87 @@
 package Project2;
 
-import java.util.ArrayList;
-
 public class PQ {
-    public Node root;
 
-    public PQ(int kArity)
+    private Event[] Heap;
+    private int size;
+    private int maxsize;
+
+    private static final int FRONT = 1;
+
+    public PQ(int maxsize)
     {
-        Node.maxNrOfChildren=kArity;
+        this.maxsize = maxsize;
+        this.size = 0;
+        Heap = new Event[maxsize];
     }
-
-    public void insert(Event info)
+    private int parent(int pos)
     {
-        root=new Node(info);
-        root.parent=null;
-        root.children=new ArrayList<Node>(Node.maxNrOfChildren);
+        return pos / 2;
     }
-
-    public int numberOfNodesInTree(Node rootNode){
-        int count=0;
-
-        count++;
-        if(rootNode.children.size()!=0) {
-            for(Node ch : rootNode.children)
-                count=count+numberOfNodesInTree(ch);
+    private int leftChild(int pos)
+    {
+        return (2 * pos);
+    }
+    private int rightChild(int pos)
+    {
+        return (2 * pos) + 1;
+    }
+    private boolean isLeaf(int pos)
+    {
+        if (pos >= (size / 2) && pos <= size) {
+            return true;
         }
-
-        return count;
+        return false;
     }
-
-    public int numberOfNodesInTree()
+    private void swap(int fpos, int spos)
     {
-        return numberOfNodesInTree(this.root);
+        Event tmp;
+        tmp = Heap[fpos];
+        Heap[fpos] = Heap[spos];
+        Heap[spos] = tmp;
     }
+    private void minHeapify(int pos)
+    {
+        if (!isLeaf(pos)) {
+            if (Heap[pos].time > Heap[leftChild(pos)].time
+                    || Heap[pos].time > Heap[rightChild(pos)].time) {
 
+                if (Heap[leftChild(pos)].time < Heap[rightChild(pos)].time) {
+                    swap(pos, leftChild(pos));
+                    minHeapify(leftChild(pos));
+                }
+                else {
+                    swap(pos, rightChild(pos));
+                    minHeapify(rightChild(pos));
+                }
+            }
+        }
+    }
+    public void insert(Event element)
+    {
+        if (size >= maxsize) {
+            Event[] tmp = Heap;
+            maxsize += maxsize;
+            Heap = new Event[maxsize];
+            Heap = tmp;
+        }
+        Heap[++size] = element;
+        int current = size;
 
+        while (Heap[current].time < Heap[parent(current)].time) {
+            swap(current, parent(current));
+            current = parent(current);
+        }
+    }
+    public Event deleteMin()
+    {
+        Event popped = Heap[FRONT];
+        Heap[FRONT] = Heap[size--];
+        minHeapify(FRONT);
+        return popped;
+    }
 
     public boolean isEmpty() {
-        return numberOfNodesInTree() <= 0;
+        return size == 0;
     }
-
-    public Event deleteMin() {
-       Event e = new Event();
-       e = root.info;
-       return e;
-  }
-
 }

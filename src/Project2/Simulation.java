@@ -3,7 +3,7 @@ package Project2;
 
 public class Simulation {
     public Simulation(int n, double Tmax){
-        PQ eventQ = new PQ(8); // file de priorité
+        PQ eventQ = new PQ(50); // file de priorité
         for (int i=0; i<n; i++)
         {
             Sim fondateur = new Sim(Sim.Sex.M); // sexe au hasard, naissance à 0.0
