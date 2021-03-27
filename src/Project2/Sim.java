@@ -1,4 +1,5 @@
 package Project2;
+import java.util.*;
 
 public class Sim implements Comparable<Sim>{
     private static int NEXT_SIM_IDX=0;
@@ -7,6 +8,11 @@ public class Sim implements Comparable<Sim>{
     public static double MIN_MATING_AGE_M = 16.0;
     public static double MAX_MATING_AGE_F = 50.0; // Janet Jackson
     public static double MAX_MATING_AGE_M = 73.0; // Charlie Chaplin
+
+    private static PriorityQueue<Sim> ancestorMalePQ;
+    private static PriorityQueue<Sim> ancestorFemalePQ;
+    private Map<Integer,Sim> ancestorMaleMap = new HashMap<>();
+    private Map<Integer, Sim> ancestorFemaleMap = new HashMap<>();
 
     /**
      * Ordering by death date.
@@ -42,6 +48,7 @@ public class Sim implements Comparable<Sim>{
         this.sex = sex;
 
         this.sim_ident = NEXT_SIM_IDX++;
+        setAncestor();
     }
 
     /**
@@ -149,5 +156,70 @@ public class Sim implements Comparable<Sim>{
     {
         return getIdentString(this)+" ["+birthtime+".."+deathtime+", mate "+getIdentString(mate)+"\tmom "+getIdentString(getMother())+"\tdad "+getIdentString(getFather())
                 +"]";
+    }
+
+    public Sim removeYoungestAncestor() {
+        Sim youngestFemaleAncestor = ancestorFemalePQ.peek();
+        Sim youngestMaleAncestor = ancestorMalePQ.peek();
+        if (youngestFemaleAncestor.compareTo(youngestMaleAncestor) != 0) {
+            if (youngestFemaleAncestor.compareTo(youngestMaleAncestor) < 0) {
+                return ancestorFemalePQ.remove();
+            }
+            else if (youngestMaleAncestor.compareTo(youngestFemaleAncestor) < 0) {
+                return ancestorMalePQ.remove();
+            }
+        }
+        return null;
+    }
+
+    public boolean verifAncestor(Sim searchedAncestor) {
+        if (!isFounder()) {
+            if (searchedAncestor.sex.equals(Sim.Sex.M)) {
+                if (ancestorMaleMap.get(searchedAncestor.sim_ident) != null) {
+                    return true;
+                }
+            }
+            else if (searchedAncestor.sex.equals(Sim.Sex.F)) {
+                if (ancestorFemaleMap.get(searchedAncestor.sim_ident) != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void setAncestor() {
+        if (!isFounder()) {
+            ancestorMalePQ.add(father);
+            ancestorMaleMap.put(father.sim_ident, father);
+            for (Sim sim : father.getAncestorMalePQ()) {
+                ancestorMalePQ.add(sim);
+                ancestorMaleMap.put(sim.sim_ident, sim);
+            }
+            for (Sim sim : mother.getAncestorMalePQ()) {
+                ancestorMalePQ.add(sim);
+                ancestorMaleMap.put(sim.sim_ident, sim);
+            }
+
+            ancestorFemalePQ.add(mother);
+            ancestorMaleMap.put(mother.sim_ident, mother);
+            for (Sim sim : father.getAncestorFemalePQ()) {
+                ancestorFemalePQ.add(sim);
+                ancestorFemaleMap.put(sim.sim_ident, sim);
+            }
+            for (Sim sim : mother.getAncestorFemalePQ()) {
+                ancestorFemalePQ.add(sim);
+                ancestorFemaleMap.put(sim.sim_ident, sim);
+            }
+        }
+
+    }
+
+    public PriorityQueue<Sim> getAncestorMalePQ() {
+        return ancestorMalePQ;
+    }
+
+    public PriorityQueue<Sim> getAncestorFemalePQ() {
+        return ancestorMalePQ;
     }
 }

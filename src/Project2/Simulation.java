@@ -23,19 +23,22 @@ public class Simulation {
         {
             Event E = eventQ.deleteMin(); // prochain événement
             if (E.time > Tmax) break; // arrêter à Tmax
-            if(E.type == NAISSANCE){
+            if (E.type == NAISSANCE){
                 List<Event> evs =  E.naissance(population);
-                for(Event ev : evs){
+                for (Event ev : evs){
                         Event e = new Event(ev.type,ev.subject,ev.time);
                         eventQ.insert(e);
                 }
             }
-            else if(E.type == REPRODUCTION){
+            else if (E.type == REPRODUCTION){
                 Event ev = E.reproduction(E.subject,population);
                 eventQ.insert(ev);
             }
-            else {
+            else if (E.type == MORT){
                 E.mort(population);
+            }
+            else {
+
             }
         }
     }
