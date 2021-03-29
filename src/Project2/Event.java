@@ -35,14 +35,16 @@ public class Event {
         Sim s = subject;
         s.setDeathTime(rdmAge+time);
         death = new Event(3,s,(float) s.getDeathTime());
-
+        if (!subject.isFounder()) {
+            subject.getMother().addAllele(subject);
+            subject.getFather().addAllele(subject);
+        }
 
         //N2  si x est une fille, alors on tire un temps d’attente A jusqu’à reproduction – enfiler nouvel événement de reproduction pour x, à temps t+A.
         if(subject.getSex() == Sim.Sex.F){
             double span = am.expectedParenthoodSpan(Sim.MIN_MATING_AGE_F, Sim.MAX_MATING_AGE_F);
             reproduction = new Event(2,s,(float)span + time);
         }
-
         //N3  on enregistre x dans la population
         population.add(s);
 
@@ -64,7 +66,6 @@ public class Event {
         type = REPRODUCTION;
         Event e;
         AgeModel am = new AgeModel();
-
 
         //R1 si x est morte, alors rien à faire
         if (mere.getDeathTime() < time){

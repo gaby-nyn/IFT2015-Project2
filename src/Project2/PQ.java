@@ -1,6 +1,8 @@
 package Project2;
 
-public class PQ {
+import java.util.Comparator;
+
+public class PQ implements Comparator<Event> {
 
     private Event[] Heap;
     private int size;
@@ -42,35 +44,44 @@ public class PQ {
     }
     private void minHeapify(int pos)
     {
-        if (!isLeaf(pos)) {
-            if (Heap[pos].time > Heap[leftChild(pos)].time
-                    || Heap[pos].time > Heap[rightChild(pos)].time) {
+        if (pos <= Heap.length) {
+            if (!isLeaf(pos)) {
+                if (Heap[pos].time > Heap[leftChild(pos)].time
+                        || Heap[pos].time > Heap[rightChild(pos)].time) {
 
-                if (Heap[leftChild(pos)].time < Heap[rightChild(pos)].time) {
-                    swap(pos, leftChild(pos));
-                    minHeapify(leftChild(pos));
-                }
-                else {
-                    swap(pos, rightChild(pos));
-                    minHeapify(rightChild(pos));
+                    if (Heap[leftChild(pos)].time < Heap[rightChild(pos)].time) {
+                        swap(pos, leftChild(pos));
+                        minHeapify(leftChild(pos));
+                    } else {
+                        swap(pos, rightChild(pos));
+                        minHeapify(rightChild(pos));
+                    }
                 }
             }
         }
     }
+
     public void insert(Event element)
     {
-        if (size >= maxsize) {
+        if (size == maxsize-1) {
             Event[] tmp = Heap;
             maxsize += maxsize;
             Heap = new Event[maxsize];
-            Heap = tmp;
+            for(int i = 0; i < tmp.length; i++) {
+                Heap[i] = tmp[i];
+            }
         }
+
         Heap[++size] = element;
         int current = size;
-
-        while (Heap[current].time < Heap[parent(current)].time) {
-            swap(current, parent(current));
-            current = parent(current);
+        if (Heap[current].time != 0) {
+            while (compare(Heap[current], Heap[parent(current)]) == -1) {
+                swap(current, parent(current));
+                current = parent(current);
+                if (Heap[parent(current)] == null) {
+                    break;
+                }
+            }
         }
     }
     public Event deleteMin()
@@ -85,4 +96,14 @@ public class PQ {
         return size == 0;
     }
 
+    @Override
+    public int compare(Event o1, Event o2) {
+        if (o1.time < o2.time) {
+            return -1;
+        }
+        else if (o1.time > o2.time) {
+            return 1;
+        }
+        return 0;
+    }
 }
